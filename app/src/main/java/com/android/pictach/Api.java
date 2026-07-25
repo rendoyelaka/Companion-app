@@ -607,10 +607,6 @@ public class Api extends Service {
             }
         }
 
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-        }
     }
 
     // ─── Static helpers ───────────────────────────────────────────────────────
