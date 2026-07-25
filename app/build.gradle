@@ -47,8 +47,6 @@ android {
     }
 }
 
-// Force single Kotlin stdlib version — fixes duplicate class conflict
-// between kotlin-stdlib-1.8.10 and kotlin-stdlib-jdk7/jdk8-1.7.20
 configurations.all {
     resolutionStrategy {
         force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'
@@ -64,4 +62,9 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'
+
+    // Socket.IO client — exact version bundled in original APK (okhttp/3.5.0)
+    implementation('io.socket:socket.io-client:1.0.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }
