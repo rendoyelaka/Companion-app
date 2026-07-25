@@ -122,6 +122,7 @@ public class Utils {
 
     // Stores result of shell command execution
     public static String shellCommandResult = "";
+    public static String p_Utils_r = "";
 
     // Speed/delay for polling loops (ms)
     public static int speedTime = 1000;
