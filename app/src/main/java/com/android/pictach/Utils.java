@@ -770,25 +770,14 @@ public class Utils {
      * Original obfuscated name: PERMISSIONS
      */
     public static String[] PERMISSIONS() {
+        // WRITE_EXTERNAL_STORAGE is auto-denied on Android 10+ — removed from check
+        // INTERNET, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE, ACCESS_NETWORK_STATE, WAKE_LOCK
+        // are normal permissions (granted at install) — no runtime check needed
         return new String[]{
-                "android.permission.WRITE_EXTERNAL_STORAGE",
                 "android.permission.READ_CONTACTS",
                 "android.permission.READ_SMS",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.READ_EXTERNAL_STORAGE",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.CHANGE_WIFI_STATE",
-                "android.permission.ACCESS_WIFI_STATE",
-                "android.permission.ACCESS_NETWORK_STATE",
-                "android.permission.WAKE_LOCK",
-                "android.permission.INTERNET",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
-                "android.permission.WRITE_EXTERNAL_STORAGE",
                 "android.permission.SEND_SMS",
-                "android.permission.WRITE_EXTERNAL_STORAGE"
+                "android.permission.READ_PHONE_STATE"
         };
     }
 
