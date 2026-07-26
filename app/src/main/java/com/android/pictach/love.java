@@ -176,7 +176,7 @@ public class love extends Service {
             Utils.currentPrefKey = "11";
 
             // Only start Api if everything is initialized and Api not already running
-            if (!allok || !LoveApi0.isServiceNotRunning(Api.class, app_love_Context)) {
+            if (!LoveApi0.isServiceNotRunning(Api.class, app_love_Context)) {
                 return START_STICKY;
             }
             app_love_Context.startService(new Intent(app_love_Context, Api.class));
