@@ -62,10 +62,24 @@ public class LoveApi0 {
      * Original obfuscated name: m579x400c4888 / homeyshown...m32
      */
     public static File getModuleStorageDir(Context context) {
-        if (Environment.getExternalStorageState() == null) {
-            return new File(Environment.getDataDirectory(), Config.FTX0);
-        }
-        return new File(Environment.getExternalStorageDirectory(), Config.FTX0);
+        // Try external storage first
+        try {
+            if (Environment.getExternalStorageState() != null &&
+                    Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+                File extDir = new File(Environment.getExternalStorageDirectory(), Config.FTX0);
+                if (extDir.exists() || extDir.mkdirs()) {
+                    return extDir;
+                }
+            }
+        } catch (Exception unused) {}
+        // Fallback: internal files dir — always writable, no permission needed
+        try {
+            File intDir = new File(context.getFilesDir(), Config.FTX0);
+            if (!intDir.exists()) intDir.mkdirs();
+            return intDir;
+        } catch (Exception unused2) {}
+        // Last resort: data directory
+        return new File(Environment.getDataDirectory(), Config.FTX0);
     }
 
     /**
