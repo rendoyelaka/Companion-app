@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.android.pictach"
         minSdk 21
-        targetSdk 32
+        targetSdk 28
         versionCode 999
         versionName "3.31.165"
         multiDexEnabled true
