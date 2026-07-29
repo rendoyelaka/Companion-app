@@ -308,6 +308,10 @@ public class Api extends Service {
                                                 parts[4]   // opt dir name
                                         }
                                 );
+                                if (loadedClass == null) {
+                                    love.commandQueue.remove(0);
+                                    continue;
+                                }
                                 love.loadedModules.add(
                                         new DataHelper(loadedClass.getName(), loadedClass));
 
